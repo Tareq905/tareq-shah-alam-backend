@@ -79,3 +79,14 @@ class SiteSetting(models.Model):
 
     def __str__(self):
         return f"{self.full_name} — Site Settings"
+
+
+class BackgroundMusic(SiteSetting):
+    """
+    Dedicated Proxy model to expose BGM as a direct, standalone menu item in Django Admin.
+    """
+    class Meta:
+        proxy = True
+        verbose_name = "Background Music (BGM)"
+        verbose_name_plural = "Background Music (BGM)"
+

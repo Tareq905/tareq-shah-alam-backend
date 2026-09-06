@@ -140,6 +140,7 @@ JAZZMIN_SETTINGS = {
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
         "core.SiteSetting": "fas fa-sliders-h",
+        "core.BackgroundMusic": "fas fa-music",
         "portfolio.Education": "fas fa-graduation-cap",
         "portfolio.Experience": "fas fa-briefcase",
         "portfolio.Project": "fas fa-rocket",
