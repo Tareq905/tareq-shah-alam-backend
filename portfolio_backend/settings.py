@@ -102,6 +102,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Audio & Media Upload Limits (Up to 100MB MP3 support)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 105 * 1024 * 1024  # 105MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 105 * 1024 * 1024
+
 # CORS configuration
 CORS_ALLOW_ALL_ORIGINS = True  # Allows Next.js on port 3000 and any dev/prod host
 CORS_ALLOW_CREDENTIALS = True
