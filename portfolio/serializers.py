@@ -29,7 +29,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_image(self, obj):
-        return obj.get_image()
+        request = self.context.get("request")
+        return obj.get_image(request=request)
 
     def get_tech_stack_list(self, obj):
         if not obj.tech_stack:

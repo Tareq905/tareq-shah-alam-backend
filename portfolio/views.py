@@ -42,10 +42,11 @@ class PortfolioBundleView(APIView):
         projects = Project.objects.all().order_by("order", "-created_at")
         research = ResearchPaper.objects.all().order_by("order", "-created_at")
 
+        context = {"request": request}
         return Response({
-            "site_setting": SiteSettingSerializer(site_setting).data,
-            "education": EducationSerializer(education, many=True).data,
-            "experience": ExperienceSerializer(experience, many=True).data,
-            "projects": ProjectSerializer(projects, many=True).data,
-            "research": ResearchPaperSerializer(research, many=True).data,
+            "site_setting": SiteSettingSerializer(site_setting, context=context).data,
+            "education": EducationSerializer(education, many=True, context=context).data,
+            "experience": ExperienceSerializer(experience, many=True, context=context).data,
+            "projects": ProjectSerializer(projects, many=True, context=context).data,
+            "research": ResearchPaperSerializer(research, many=True, context=context).data,
         })

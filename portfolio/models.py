@@ -85,10 +85,25 @@ class Project(models.Model):
         verbose_name = "Project"
         verbose_name_plural = "Projects"
 
-    def get_image(self):
+    def get_image(self, request=None):
         if self.image_file:
-            return self.image_file.url
+            try:
+                url = self.image_file.url
+                if request:
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                pass
         return self.image_url or "/projects/project1.png"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image_file:
+            try:
+                if not self.image_url or self.image_url.startswith("/projects/"):
+                    Project.objects.filter(pk=self.pk).update(image_url=self.image_file.url)
+            except Exception:
+                pass
 
     def __str__(self):
         return self.title

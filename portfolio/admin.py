@@ -27,6 +27,22 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ("title", "description", "tech_stack")
     list_editable = ("is_featured", "order")
     ordering = ("order", "-created_at")
+    readonly_fields = ("current_image_preview", "created_at")
+    fieldsets = (
+        ("Basic Information", {
+            "fields": ("title", "category", "description", "order", "is_featured")
+        }),
+        ("Project Visual / Image", {
+            "fields": ("image_file", "current_image_preview", "image_url"),
+            "description": "Upload a new image file (recommended) OR provide an image URL / path. Uploaded files take priority."
+        }),
+        ("External Links", {
+            "fields": ("live_url", "github_url")
+        }),
+        ("Technologies & Timestamps", {
+            "fields": ("tech_stack", "created_at")
+        }),
+    )
 
     def preview_thumbnail(self, obj):
         img_src = obj.get_image()
@@ -37,6 +53,22 @@ class ProjectAdmin(admin.ModelAdmin):
             )
         return "No Image"
     preview_thumbnail.short_description = "Preview"
+
+    def current_image_preview(self, obj):
+        if not obj or not obj.pk:
+            return "Save project to view preview."
+        img_src = obj.get_image()
+        if img_src:
+            return format_html(
+                '<div style="margin: 6px 0;">'
+                '<img src="{}" style="max-width: 280px; max-height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(0,0,0,0.5);" />'
+                '<div style="color: #00e5ff; font-size: 11px; margin-top: 4px; font-family: monospace;">Source: {}</div>'
+                '</div>',
+                img_src,
+                img_src
+            )
+        return "No image uploaded yet"
+    current_image_preview.short_description = "Active Image Preview"
 
 
 @admin.register(ResearchPaper)
