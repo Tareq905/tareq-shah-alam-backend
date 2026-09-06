@@ -8,7 +8,7 @@ from .serializers import (
     ProjectSerializer,
     ResearchPaperSerializer,
 )
-from core.models import SiteSetting
+from core.models import SiteSetting, BackgroundMusic
 from core.serializers import SiteSettingSerializer
 
 class EducationListView(generics.ListAPIView):
@@ -43,8 +43,17 @@ class PortfolioBundleView(APIView):
         research = ResearchPaper.objects.all().order_by("order", "-created_at")
 
         context = {"request": request}
+        site_setting_data = SiteSettingSerializer(site_setting, context=context).data
+
+        # Prioritize dedicated BackgroundMusic model if available
+        bgm = BackgroundMusic.objects.order_by("-updated_at").first()
+        if bgm:
+            site_setting_data["is_bgm_enabled"] = bgm.is_active
+            site_setting_data["bgm_file"] = request.build_absolute_uri(bgm.audio_file.url) if bgm.audio_file else None
+            site_setting_data["bgm_title"] = bgm.title
+
         return Response({
-            "site_setting": SiteSettingSerializer(site_setting, context=context).data,
+            "site_setting": site_setting_data,
             "education": EducationSerializer(education, many=True, context=context).data,
             "experience": ExperienceSerializer(experience, many=True, context=context).data,
             "projects": ProjectSerializer(projects, many=True, context=context).data,

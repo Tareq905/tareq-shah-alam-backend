@@ -4,29 +4,23 @@ from .models import SiteSetting, BackgroundMusic
 
 @admin.register(BackgroundMusic)
 class BackgroundMusicAdmin(admin.ModelAdmin):
-    list_display = ("bgm_title", "is_bgm_enabled", "bgm_file", "audio_player", "updated_at")
-    list_editable = ("is_bgm_enabled",)
+    list_display = ("title", "is_active", "audio_file", "audio_player", "updated_at")
+    list_editable = ("is_active",)
     readonly_fields = ("audio_player",)
-    fields = ("is_bgm_enabled", "bgm_file", "audio_player", "bgm_title")
+    fields = ("title", "is_active", "audio_file", "audio_player")
 
     def audio_player(self, obj):
-        if obj.bgm_file:
+        if obj and obj.audio_file:
             return format_html(
-                '<audio controls src="{}" style="height: 36px; vertical-align: middle;"></audio>',
-                obj.bgm_file.url
+                '<audio controls src="{}" style="height: 38px; vertical-align: middle;"></audio>',
+                obj.audio_file.url
             )
         return format_html(
-            '<span style="color: #06b6d4; font-family: monospace; font-size: 13px;">'
-            '🎵 Default Track: <code>/arabic-bgm.mp3</code>'
+            '<span style="color: #06b6d4; font-family: monospace; font-size: 13px; font-weight: 600;">'
+            '🎵 Default Base Track: <code>/arabic-bgm.mp3</code> (Active)'
             '</span>'
         )
     audio_player.short_description = "Live Audio Player / Test"
-
-    def has_add_permission(self, request):
-        return False  # Singleton proxy to SiteSetting
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(SiteSetting)

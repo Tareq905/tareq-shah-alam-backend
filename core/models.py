@@ -81,12 +81,39 @@ class SiteSetting(models.Model):
         return f"{self.full_name} — Site Settings"
 
 
-class BackgroundMusic(SiteSetting):
+class BackgroundMusic(models.Model):
     """
-    Dedicated Proxy model to expose BGM as a direct, standalone menu item in Django Admin.
+    Dedicated Background Music management model with MP3 file upload up to 100MB,
+    pause/play toggle, and default fallback.
     """
+    title = models.CharField(
+        max_length=200,
+        default="Background Music Track",
+        verbose_name="Track Title",
+        help_text="Title or description of the background music"
+    )
+    audio_file = models.FileField(
+        upload_to="bgm/",
+        blank=True,
+        null=True,
+        validators=[validate_bgm_file],
+        verbose_name="Upload MP3 File (Max 100MB)",
+        help_text="Upload custom MP3 audio (up to 100MB). When uploaded, this plays as base BGM. Delete/clear file to play default arabic-bgm.mp3."
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Play / Enable Music",
+        help_text="Uncheck to pause/silence music portfolio-wide."
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
-        proxy = True
         verbose_name = "Background Music (BGM)"
         verbose_name_plural = "Background Music (BGM)"
+        ordering = ["-updated_at"]
 
+    def __str__(self):
+        status = "PLAYING" if self.is_active else "PAUSED"
+        source = "Custom Upload" if self.audio_file else "Default arabic-bgm.mp3"
+        return f"{self.title} [{status} • {source}]"
