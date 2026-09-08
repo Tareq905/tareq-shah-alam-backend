@@ -45,12 +45,15 @@ class PortfolioBundleView(APIView):
         context = {"request": request}
         site_setting_data = SiteSettingSerializer(site_setting, context=context).data
 
-        # Prioritize dedicated BackgroundMusic model if available
+        # Determine background music configuration and active state
         bgm = BackgroundMusic.objects.order_by("-updated_at").first()
         if bgm:
-            site_setting_data["is_bgm_enabled"] = bgm.is_active
-            site_setting_data["bgm_file"] = request.build_absolute_uri(bgm.audio_file.url) if bgm.audio_file else None
-            site_setting_data["bgm_title"] = bgm.title
+            # If EITHER SiteSetting or BackgroundMusic model is toggled off, respect disable!
+            site_setting_data["is_bgm_enabled"] = bool(site_setting.is_bgm_enabled and bgm.is_active)
+            site_setting_data["bgm_file"] = request.build_absolute_uri(bgm.audio_file.url) if bgm.audio_file else (site_setting_data.get("bgm_file") or None)
+            site_setting_data["bgm_title"] = bgm.title or site_setting.bgm_title
+        else:
+            site_setting_data["is_bgm_enabled"] = bool(site_setting.is_bgm_enabled)
 
         return Response({
             "site_setting": site_setting_data,

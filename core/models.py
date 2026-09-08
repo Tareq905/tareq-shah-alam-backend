@@ -76,6 +76,11 @@ class SiteSetting(models.Model):
         # Enforce singleton pattern (only 1 config object)
         self.pk = 1
         super().save(*args, **kwargs)
+        # Keep BackgroundMusic model in sync
+        try:
+            BackgroundMusic.objects.all().update(is_active=self.is_bgm_enabled)
+        except Exception:
+            pass
 
     def __str__(self):
         return f"{self.full_name} — Site Settings"
@@ -113,7 +118,34 @@ class BackgroundMusic(models.Model):
         verbose_name_plural = "Background Music (BGM)"
         ordering = ["-updated_at"]
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Keep SiteSetting in sync
+        try:
+            SiteSetting.objects.filter(pk=1).update(is_bgm_enabled=self.is_active)
+        except Exception:
+            pass
+
     def __str__(self):
         status = "PLAYING" if self.is_active else "PAUSED"
         source = "Custom Upload" if self.audio_file else "Default arabic-bgm.mp3"
         return f"{self.title} [{status} • {source}]"
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=SiteSetting)
+def sync_bgm_from_sitesetting(sender, instance, **kwargs):
+    try:
+        BackgroundMusic.objects.all().update(is_active=instance.is_bgm_enabled)
+    except Exception:
+        pass
+
+@receiver(post_save, sender=BackgroundMusic)
+def sync_sitesetting_from_bgm(sender, instance, **kwargs):
+    try:
+        SiteSetting.objects.filter(pk=1).update(is_bgm_enabled=instance.is_active)
+    except Exception:
+        pass
+
